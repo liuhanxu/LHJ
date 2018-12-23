@@ -70,7 +70,7 @@ public class Util : MonoBehaviour
 	public static T Get<T> (Transform go, string subnode) where T : Component
 	{
 		if (go != null) {
-			Transform sub = go.FindChild (subnode);
+			Transform sub = go.Find (subnode);
 			if (sub != null)
 				return sub.GetComponent<T> ();
 		}
@@ -122,7 +122,7 @@ public class Util : MonoBehaviour
 	/// </summary>
 	public static GameObject Child (Transform go, string subnode)
 	{
-		Transform tran = go.FindChild (subnode);
+		Transform tran = go.Find (subnode);
 		if (tran == null)
 			return null;
 		return tran.gameObject;
@@ -141,7 +141,7 @@ public class Util : MonoBehaviour
 	/// </summary>
 	public static GameObject Peer (Transform go, string subnode)
 	{
-		Transform tran = go.parent.FindChild (subnode);
+		Transform tran = go.parent.Find (subnode);
 		if (tran == null)
 			return null;
 		return tran.gameObject;
@@ -205,7 +205,7 @@ public class Util : MonoBehaviour
 
 	public static bool DelChild(Transform t,string name)
 	{
-		GameObject go = t.FindChild (name).gameObject;
+		GameObject go = t.Find (name).gameObject;
 		if (go != null) {
 			Destroy (go);
 			return true;

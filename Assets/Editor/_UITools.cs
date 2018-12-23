@@ -116,7 +116,7 @@ public class _UITools : Editor
 		if (chJD.IsArray && chJD.Count > 0) {
 			for (int i = 0; i < chJD.Count; ++i) {
 				JsonData cd = chJD [i];
-				Transform cht = t.FindChild (cd ["name"].ToString());
+				Transform cht = t.Find (cd ["name"].ToString());
 				if (cht != null) {
 					SetTransform (cht, cd);
 				}

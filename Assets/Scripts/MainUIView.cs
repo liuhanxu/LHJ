@@ -24,6 +24,8 @@ public class MainUIView : MonoBehaviour
 
     [SerializeField]
     Button start_btn, change_btn, da_btn, xiao_btn, auto_btn, clear_btn, setting_btn, quit_btn, modPwd_btn;
+    [SerializeField]
+    Dropdown dd;
 
     [SerializeField]
     GameObject light;
@@ -37,9 +39,10 @@ public class MainUIView : MonoBehaviour
     int curTotalBet = 0;
     int[] curBets = new int[8];
     int obtain = 0;
+    int control = 0;
 
     // Use this for initialization
-    void Awake()
+    void Start()
     {
         InitUI();
         InitData();
@@ -77,7 +80,9 @@ public class MainUIView : MonoBehaviour
         }
 
         float sound = PlayerPrefs.GetFloat("SOUND",1);
+        EventSystem.Instance.FireEvent(EventCode.SoundSetting, sound);
         setting_btn.GetComponentInChildren<Text>().text = sound > 0 ? "声音开" : "声音关";
+
 
         light.SetActive(false);
 
@@ -90,6 +95,7 @@ public class MainUIView : MonoBehaviour
         setting_btn.onClick.AddListener(onSetting);
         quit_btn.onClick.AddListener(onQuit);
         modPwd_btn.onClick.AddListener(onModPwd);
+        dd.onValueChanged.AddListener(onDD);
     }
 
     void InitData()
@@ -156,7 +162,7 @@ public class MainUIView : MonoBehaviour
 
         EventSystem.Instance.FireEvent(EventCode.ShowTips, "当前分档为一次" + GlobalData.times[GlobalData.curTimeIndex] + "分");
 
-        //change_btn.GetComponentInChildren<Text>().text = curTimes.ToString();
+        change_btn.GetComponentInChildren<Text>().text = curTimes.ToString();
     }
 
     void onClear()
@@ -221,9 +227,10 @@ public class MainUIView : MonoBehaviour
     {
         soundManager.BtnTap(8);
         float sound = PlayerPrefs.GetFloat("SOUND", 1);
-        EventSystem.Instance.FireEvent(EventCode.SoundSetting, sound > 0 ? 0f : 1f);
-        PlayerPrefs.SetFloat("SOUND", sound > 0 ? 0f : 1f);
-        setting_btn.GetComponentInChildren<Text>().text = sound > 0 ? "声音关" : "声音开";
+        sound = sound > 0 ? 0f : 1f;
+        EventSystem.Instance.FireEvent(EventCode.SoundSetting, sound);
+        PlayerPrefs.SetFloat("SOUND", sound);
+        setting_btn.GetComponentInChildren<Text>().text = sound > 0 ? "声音开" : "声音关";
     }
     void onModPwd()
     {
@@ -233,6 +240,7 @@ public class MainUIView : MonoBehaviour
     void onQuit()
     {
         soundManager.BtnTap(8);
+        Application.Quit();
     }
 
     void Score()
@@ -240,6 +248,10 @@ public class MainUIView : MonoBehaviour
         GlobalData.playerTotal += obtain;
         obtain = 0;
         UpdateUIState();
+    }
+
+    void onDD(int index){
+        control = index;
     }
 
     void ResetEffect()
@@ -262,6 +274,10 @@ public class MainUIView : MonoBehaviour
             return;
         }
 
+        obtain = 0;
+        show_txt.text = obtain.ToString();
+        UpdateUIState();
+
         string betStr = "";
 
         GameManager.Instance.httpClient.JStartGame(GlobalData.userId, betStr, (res) => {
@@ -278,13 +294,33 @@ public class MainUIView : MonoBehaviour
                 UpdateUIState();
 
                 int des = Random.Range(0, 24);//模拟
+                switch (control)
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        des = Random.Range(0, 20) < 10 ? 4 : 16;
+                        break;
+                    case 2:
+                        des = Random.Range(0, 20) < 10 ?1:13;
+                        break;
+                    case 3:
+                        des = 15;
+                        break;
+                    case 4:
+                        des = 3;
+                        break;
+                }
+
+
                 Debug.Log("Last=" + lastPrizeNo + "   result=" + des);
 
-                if (des > 1)// (des == 9 || des == 21)
+                if /*(des > 1)// */(des == 9 || des == 21)
                 {
                     int len = Random.Range(3, 6);
                     int[] results = new int[len];
                     results[0] = Random.Range(0, 9);
+                    int ob = 0;
                     for (int i = 1; i < len;i++ )
                     {
                         if (results[i - 1] + 4 > 23)
@@ -296,11 +332,14 @@ public class MainUIView : MonoBehaviour
                             results[i] = results[i - 1] + 4;
                         }
                         Debug.Log("res=" + results[i]);
+                        ob += Const.PRIZE[results[i]];
                     }
+                    obtain = ob;
                     StartCoroutine(yieldRun(lastPrizeNo, 21, results[0], results));
                 }
                 else
                 {
+                    obtain = Const.PRIZE[des];
                     StartCoroutine(yieldRun(lastPrizeNo, des));//, 15,19));
                 }
                 lastPrizeNo = des;
@@ -362,17 +401,17 @@ public class MainUIView : MonoBehaviour
         Debug.Log("2------------------------------------------" + Time.time);
         isRunning = false;
         light.SetActive(false);
-        UpdateUIState();
 
         //soundManager.PlaySingle(des);
         soundManager.Prize(des%9);
 
-        obtain = 30;
+        //obtain = 30;
         show_txt.text = obtain.ToString();
-        UpdateUIState();
 
         fruitItems[des].PlayLight(0);
         Prize(des);
+        GlobalData.playerTotal += obtain;
+        UpdateUIState();
 
         if (isAuto)
         {
@@ -494,7 +533,6 @@ public class MainUIView : MonoBehaviour
         }
 
         isRunning = false;
-        UpdateUIState();
         light.SetActive(false);
 
         //soundManager.BigPrize(des3.Length-1);
@@ -503,7 +541,8 @@ public class MainUIView : MonoBehaviour
 
         fruitItems[des3[des3.Length - 1]].PlayLight(0);
         Prize(last1);
-
+        GlobalData.playerTotal += obtain;
+        UpdateUIState();
 
         if (isAuto)
         {

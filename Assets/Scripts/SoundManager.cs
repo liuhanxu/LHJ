@@ -30,7 +30,7 @@ public class SoundManager : MonoBehaviour
 
 
     // Use this for initialization
-    void Start()
+    void Awake()
     {
         RegistHandlers();
     }
@@ -174,6 +174,7 @@ public class SoundManager : MonoBehaviour
         clip_source.volume = (float)para;
         bg_source.volume = (float)para;
         extra_scource.volume = (float)para;
+        Debug.Log(para);
     }
 
     void RegistHandlers()

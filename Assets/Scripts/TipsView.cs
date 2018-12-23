@@ -30,6 +30,7 @@ public class TipsView : MonoBehaviour {
 
     void onTips(object para)
     {
+        gameObject.SetActive(true);
         info_txt.text = para.ToString();
         transform.localPosition = new Vector3(0, -800, 0);
 
@@ -38,7 +39,7 @@ public class TipsView : MonoBehaviour {
         tw = transform.DOLocalMoveY(0, 0.5f).SetEase(Ease.InOutCubic);
 
 
-       // StartCoroutine(HideView());
+        StartCoroutine(HideView());
     }
 
     void RegistHandlers()

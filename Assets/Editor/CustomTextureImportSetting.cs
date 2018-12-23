@@ -143,10 +143,10 @@ public class CustomTextureImportSetting : EditorWindow
         switch (TextureTypeInt)
         {
             case 0:
-                textureImporter.textureType = TextureImporterType.Image;
+                textureImporter.textureType = TextureImporterType.Default;
                 break;
             case 1:
-                textureImporter.textureType = TextureImporterType.Bump;
+                textureImporter.textureType = TextureImporterType.NormalMap;
                 break;
             case 2:
                 textureImporter.textureType = TextureImporterType.GUI;
@@ -161,7 +161,7 @@ public class CustomTextureImportSetting : EditorWindow
                 textureImporter.textureType = TextureImporterType.Lightmap;
                 break;
             case 6:
-                textureImporter.textureType = TextureImporterType.Advanced;
+                textureImporter.textureType = TextureImporterType.Default;
                 break;
             case 7:
                 textureImporter.textureType = TextureImporterType.Cursor;
